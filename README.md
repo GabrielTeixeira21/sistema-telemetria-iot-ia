@@ -1,58 +1,47 @@
-# 🏎️ Sistema End-to-End de Ingestão de Telemetria IoT & Deteção de Anomalias com IA
+# 🏎️ End-to-End IoT Telemetry Ingestion & AI Anomaly Detection System
 
-Este é um ecossistema distribuído concebido para simular, ingerir, persistir e analisar fluxos de dados (streaming) de alta frequência provenientes de sensores de um veículo de competição ou dispositivo IoT. 
+This is a distributed ecosystem designed to simulate, ingest, persist, and analyze high-frequency streaming data from racing vehicle sensors or IoT devices.
+The main goal of this project is to demonstrate an End-to-End (E2E) Architecture where data travels from the physical simulation on the track to an Artificial Intelligence analytical layer that identifies dynamic faults without relying on rigid, hardcoded thresholds.
 
-O principal objetivo do projeto é demonstrar uma **Arquitetura End-to-End (E2E)** onde o dado viaja desde a simulação física na pista até uma camada analítica de Inteligência Artificial que identifica falhas dinâmicas, sem depender de limites rígidos (*hardcoded*).
+## 🏗️ System Architecture
 
----
+The ecosystem is divided into four main layers:
+* **Generation Layer (Data Source):** A dynamic Python simulator that generates physical metrics every 500ms and injects controlled mechanical faults.
+* **Ingestion & Business Layer (REST API):** A robust Java Spring Boot 3 microservice applying modern software design best practices.
+* **Persistence Layer (Data Store):** A PostgreSQL relational database focused on a Time-Series / Event Log pattern.
+* **Analytical Layer (AI Engine):** A Python module using Scikit-Learn for unsupervised Machine Learning auditing and anomaly isolation.
 
-## 🏗️ Arquitetura do Sistema
-
-O ecossistema está dividido em quatro camadas principais:
-
-1. **Camada de Geração (Data Source):** Um simulador dinâmico em **Python** que gera métricas físicas a cada 500ms e injeta falhas mecânicas controladas.
-2. **Camada de Ingestão & Negócio (REST API):** Um microsserviço robusto em **Java Spring Boot 21** aplicando as melhores práticas de design.
-3. **Camada de Persistência (Data Store):** Base de dados relacional **PostgreSQL** focada no padrão *Time-Series / Log de Eventos*.
-4. **Camada Analítica (AI Engine):** Módulo em **Python** com **Scikit-Learn** para auditoria e isolamento de anomalias por Machine Learning não supervisionado.
-
----
-
-## 🛠️ Tecnologias & Padrões Utilizados
+## 🛠️ Technologies & Patterns Used
 
 ### Backend (Java)
-* **Spring Boot 21 & Spring Web:** Criação de endpoints REST concorrentes.
-* **Spring Data JPA & Hibernate ORM:** Mapeamento objeto-relacional automático e abstração de queries SQL.
-* **Repository Pattern:** Desacoplamento da camada de dados garantindo segurança contra *SQL Injection*.
-* **Inversão de Controlo (IoC) & Injeção de Dependências:** Gestão de ciclo de vida e modularidade via construtores (`private final`).
-* **Lombok:** Redução de *boilerplate code* via anotações.
+* **Spring Boot 3 & Spring Web:** Development of concurrent REST endpoints.
+* **Spring Data JPA & Hibernate ORM:** Automatic object-relational mapping and SQL query abstraction.
+* **Repository Pattern:** Decoupling the data layer while ensuring security against SQL Injection.
+* **Inversion of Control (IoC) & Dependency Injection:** Lifecycle management and modularity via constructor injection (`private final`).
+* **Lombok:** Reduction of boilerplate code via annotations.
 
-### Inteligência Artificial & Simulação (Python)
-* **Scikit-Learn (Isolation Forest):** Algoritmo de Machine Learning não supervisionado focado em isolamento geométrico de anomalias contextuais.
-* **Pandas:** Manipulação, limpeza e análise de séries temporais estruturadas.
-* **SQLAlchemy & Psycopg2:** Conexão nativa e extração de dados otimizada a partir do PostgreSQL.
-* **Requests:** Comunicação HTTP assíncrona com o ecossistema Java.
+### Artificial Intelligence & Simulation (Python)
+* **Scikit-Learn (Isolation Forest):** Unsupervised Machine Learning algorithm focused on the geometric isolation of contextual anomalies.
+* **Pandas:** Manipulation, cleaning, and analysis of structured time-series data.
+* **SQLAlchemy & Psycopg2:** Native connection and optimized data extraction from PostgreSQL.
+* **Requests:** HTTP communication with the Java ecosystem.
 
----
+## 🧠 The AI Engine: Why Isolation Forest?
 
-## 🧠 O Motor de IA: Porquê o Isolation Forest?
+In industrial and high-performance systems, fixed thresholds (e.g., `if temperature > 100`) fail because a fault depends heavily on the track context (G-forces, current speed, etc.).
+This system utilizes **Isolation Forest** (Unsupervised Learning) due to the natural scarcity of fault data in real-world scenarios. Instead of learning what a failure looks like, the algorithm learns the structure of normal on-track behavior.
 
-Em sistemas industriais e de alta performance, os limites fixos (ex: `if temperatura > 100`) falham porque uma falha depende do contexto de pista (forças G, velocidade atual, etc.). 
+Since anomalies are rare and distinct from normal data clusters, the model isolates them with very few splits in a randomized decision tree. The algorithm identifies a mechanical failure through sudden drops in expected correlation (e.g., temperature spiking to 200°C while acceleration drops sharply due to violent braking), assigning these data rows an anomaly score of `-1`.
 
-Este sistema utiliza **Isolation Forest (Aprendizagem Não Supervisionada)** devido à escassez natural de dados de falhas em cenários reais. Em vez de aprender o que é uma avaria, o algoritmo aprende a estrutura do comportamento normal em pista. 
+## 🚀 How to Run the Project
 
-Como as anomalias são raras e geograficamente distantes do aglomerado normal, o modelo isola-as com muito poucas divisões numa árvore de decisão aleatória. O algoritmo identifica a quebra mecânica através da quebra brusca de correlação (ex: temperatura a disparar a 200ºC com aceleração em valores severamente negativos devido a travagens mecânicas violentas), atribuindo a estas linhas a classificação de **`-1`**.
+### 1. Prerequisites
+* Java 21+ installed.
+* PostgreSQL running with a database named `iot_telemetria_db` created.
+* Python 3.10+ installed.
 
----
-
-## 🚀 Como Executar o Projeto
-
-### 1. Requisitos Prévios
-* Java 21+ instalado.
-* PostgreSQL com a base de dados `iot_telemetria_db` criada.
-* Python 3.10+ instalado.
-
-### 2. Executar o Backend (Java)
-Configure as suas credenciais no ficheiro `src/main/resources/application.properties` e corra a aplicação principal:
+### 2. Running the Backend (Java)
+Configure your credentials in the `src/main/resources/application.properties` file and run the main application:
 ```bash
-# O Hibernate criará as tabelas automaticamente no PostgreSQL
+# Hibernate will automatically generate the database tables in PostgreSQL
 ./mvnw spring-boot:run
